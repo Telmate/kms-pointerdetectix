@@ -812,6 +812,12 @@ kms_pointer_detectix_transform_frame_ip (GstVideoFilter * filter,
   int best_candidate;
   gint i;
 
+  if(frame != NULL)
+  {
+    g_printf("%s --- %s --- wdt=%d  hgt=%d \n", PLUGIN_NAME, __func__, frame->info.width, frame->info.height);
+    return GST_FLOW_OK;
+  }
+
   if ((pointerdetectix->priv->x_calibration == 0)
       && (pointerdetectix->priv->y_calibration == 0)
       && (pointerdetectix->priv->width_calibration == 0)

@@ -67,4 +67,4 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "Compiling : ${PROJECT_NAME}-${PROJECT_VERSION}")
 
 add_subdirectory (src)
-add_subdirectory(tests)
+
