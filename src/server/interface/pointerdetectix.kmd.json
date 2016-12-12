@@ -1,0 +1,14 @@
+{
+  "name": "pointerdetectix",
+  "version": "6.6.1-dev",
+  "kurentoVersion": "^6.1.0",
+  "code": {
+    "api": {
+      "js": {
+        "nodeName": "kurento-module-pointerdetectix",
+        "npmDescription": "Pointer Detectix Filter",
+        "npmGit": "Kurento/kurento-module-pointerdetectix-js"
+      }
+    }
+  }
+}

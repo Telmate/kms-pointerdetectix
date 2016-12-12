@@ -1,12 +1,12 @@
 {
   "remoteClasses": [
     {
-      "name": "PointerDetectorFilter",
+      "name": "PointerDetectixFilter",
       "extends": "Filter",
       "doc": "This type of :rom:cls:`Filter` detects UI pointers in a video feed.",
       "constructor":
         {
-          "doc": "Builder for the :rom:cls:`PointerDetector`.",
+          "doc": "Builder for the :rom:cls:`PointerDetectix`.",
           "params": [
             {
               "name": "mediaPipeline",
@@ -21,7 +21,7 @@
             {
               "name": "windows",
               "doc": "list of detection windows for the filter.",
-              "type": "PointerDetectorWindowMediaParam[]",
+              "type": "PointerDetectixWindowMediaParam[]",
               "optional": true,
               "defaultValue": []
             }
@@ -35,13 +35,13 @@
             {
               "name": "window",
               "doc": "The window to be added",
-              "type": "PointerDetectorWindowMediaParam"
+              "type": "PointerDetectixWindowMediaParam"
             }
           ]
         },
         {
           "name": "clearWindows",
-          "doc": "Removes all pointer detector windows",
+          "doc": "Removes all pointer detectix windows",
           "params": []
         },
         {
@@ -142,7 +142,7 @@
           "optional": true
         }
       ],
-      "name": "PointerDetectorWindowMediaParam",
+      "name": "PointerDetectixWindowMediaParam",
       "doc": "Data structure for UI Pointer detection in video streams.\n\nAll the coordinates are in pixels. X is horizontal, Y is vertical, running from the top of the window. Thus, 0,0 corresponds to the topleft corner."
     }
   ],

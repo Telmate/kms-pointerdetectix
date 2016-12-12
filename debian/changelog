@@ -1,4 +1,4 @@
-kms-pointerdetector-6.0 (6.6.0) testing; urgency=medium
+kms-pointerdetectix-6.0 (6.6.0) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -8,7 +8,7 @@ kms-pointerdetector-6.0 (6.6.0) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Fri, 09 Sep 2016 17:25:52 +0200
 
-kms-pointerdetector-6.0 (6.5.0) testing; urgency=medium
+kms-pointerdetectix-6.0 (6.5.0) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -17,7 +17,7 @@ kms-pointerdetector-6.0 (6.5.0) testing; urgency=medium
   * Add badges into all README.md
 
   [ Santiago Carot-Nemesio ]
-  * test_pointerdetector: Remove wrong dependancy
+  * test_pointerdetectix: Remove wrong dependancy
 
   [ Jose Antonio Santos Cadenas ]
   * Add .build.yaml
@@ -29,7 +29,7 @@ kms-pointerdetector-6.0 (6.5.0) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Tue, 31 May 2016 09:25:38 +0200
 
-kms-pointerdetector-6.0 (6.4.0) testing; urgency=medium
+kms-pointerdetectix-6.0 (6.4.0) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -45,7 +45,7 @@ kms-pointerdetector-6.0 (6.4.0) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Thu, 25 Feb 2016 12:51:20 +0100
 
-kms-pointerdetector-6.0 (6.3.0) testing; urgency=medium
+kms-pointerdetectix-6.0 (6.3.0) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -55,7 +55,7 @@ kms-pointerdetector-6.0 (6.3.0) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Wed, 20 Jan 2016 08:05:17 +0100
 
-kms-pointerdetector-6.0 (6.2.0) testing; urgency=medium
+kms-pointerdetectix-6.0 (6.2.0) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -66,7 +66,7 @@ kms-pointerdetector-6.0 (6.2.0) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Thu, 26 Nov 2015 12:59:31 +0100
 
-kms-pointerdetector-6.0 (6.1.1) testing; urgency=medium
+kms-pointerdetectix-6.0 (6.1.1) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -83,7 +83,7 @@ kms-pointerdetector-6.0 (6.1.1) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Fri, 02 Oct 2015 17:32:05 +0200
 
-kms-pointerdetector-6.0 (6.1.0) testing; urgency=medium
+kms-pointerdetectix-6.0 (6.1.0) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -93,7 +93,7 @@ kms-pointerdetector-6.0 (6.1.0) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Tue, 01 Sep 2015 16:23:39 +0200
 
-kms-pointerdetector-6.0 (6.0.0) testing; urgency=medium
+kms-pointerdetectix-6.0 (6.0.0) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -116,13 +116,13 @@ kms-pointerdetector-6.0 (6.0.0) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Wed, 15 Jul 2015 10:21:35 +0200
 
-kms-pointerdetector-6.0 (6.0.0~0) testing; urgency=medium
+kms-pointerdetectix-6.0 (6.0.0~0) testing; urgency=medium
 
   * Prerelease for 6.0.0
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Wed, 18 Feb 2015 10:32:55 +0100
 
-kms-pointerdetector (1.0.3) testing; urgency=medium
+kms-pointerdetectix (1.0.3) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -137,7 +137,7 @@ kms-pointerdetector (1.0.3) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Tue, 03 Feb 2015 11:26:18 +0100
 
-kms-pointerdetector (1.0.2) testing; urgency=medium
+kms-pointerdetectix (1.0.2) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -158,7 +158,7 @@ kms-pointerdetector (1.0.2) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Sun, 25 Jan 2015 23:56:31 +0100
 
-kms-pointerdetector (1.0.1) testing; urgency=medium
+kms-pointerdetectix (1.0.1) testing; urgency=medium
 
   [ Jose Antonio Santos Cadenas ]
   * Prepare for next development iteration
@@ -169,22 +169,22 @@ kms-pointerdetector (1.0.1) testing; urgency=medium
 
  -- Jose Antonio Santos Cadenas <santoscadenas@gmail.com>  Thu, 09 Oct 2014 10:21:14 +0200
 
-kms-pointerdetector (1.0.0) testing; urgency=medium
+kms-pointerdetectix (1.0.0) testing; urgency=medium
 
   [ David Fernandez ]
-  * pointerdetector2: Create a filter to track a ball using a color filter
-  * pointerdetector2: Add color calibration method
-  * pointerdetector2: Fix problems in filter behaviour
+  * pointerdetectix2: Create a filter to track a ball using a color filter
+  * pointerdetectix2: Add color calibration method
+  * pointerdetectix2: Fix problems in filter behaviour
 
   [ Jose Antonio Santos Cadenas ]
-  * pointerdetector: Increase threshold of calibration values
-  * pointerdetector2: Avoid problems with released memory
+  * pointerdetectix: Increase threshold of calibration values
+  * pointerdetectix2: Avoid problems with released memory
 
   [ David Fernandez ]
-  * pointerdetector2: Fix problem drawing the calibration window
-  * pointerdetector2: Protect critical section
-  * Free windows structures in pointer detector filters
-  * cmake: Compile pointerdetector2 filter
+  * pointerdetectix2: Fix problem drawing the calibration window
+  * pointerdetectix2: Protect critical section
+  * Free windows structures in pointer detectix filters
+  * cmake: Compile pointerdetectix2 filter
   * cmake: Change module installation directory
   * cmake: Remove use of c99 standard in plugin compilation
 
@@ -198,8 +198,8 @@ kms-pointerdetector (1.0.0) testing; urgency=medium
   * Add suffix commons for all code generated in commons library
 
   [ David Fernandez ]
-  * Create pointerdetector module
-  * pointerdetector: Remove unused variable in test
+  * Create pointerdetectix module
+  * pointerdetectix: Remove unused variable in test
   * Adapt filter to use namespaces
   * Add .gitreview file
   * Add debian package generation
@@ -214,7 +214,7 @@ kms-pointerdetector (1.0.0) testing; urgency=medium
 
  -- David Fernandez <d.fernandezlop@gmail.com>  Wed, 24 Sep 2014 23:02:27 +0200
 
-kms-pointerdetector (0.0.1~rc1) testing; urgency=medium
+kms-pointerdetectix (0.0.1~rc1) testing; urgency=medium
 
   * Initial release.
 

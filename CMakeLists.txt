@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project ("kms-pointerdetector")
+project ("kms-pointerdetectix")
 
 message ("If KurentoHelpers is not found, then it is necessary to install
           kms-cmake-utils package from the kurento repository")
@@ -37,7 +37,7 @@ pkg_check_modules(SOUP REQUIRED libsoup-2.4>=${SOUP_REQUIRED})
 
 set (VERSION ${PROJECT_VERSION})
 set (PACKAGE ${PROJECT_NAME})
-set (GETTEXT_PACKAGE "kms-pointerdetector")
+set (GETTEXT_PACKAGE "kms-pointerdetectix")
 set (MANUAL_CHECK OFF CACHE BOOL "Tests will generate files")
 
 include(GNUInstallDirs)

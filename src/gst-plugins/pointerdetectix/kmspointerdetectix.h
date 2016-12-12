@@ -24,14 +24,14 @@
 #include <stdio.h>
 
 G_BEGIN_DECLS
-#define KMS_TYPE_POINTER_DETECTOR   (kms_pointer_detector_get_type())
-#define KMS_POINTER_DETECTOR(obj)   (G_TYPE_CHECK_INSTANCE_CAST((obj),KMS_TYPE_POINTER_DETECTOR,KmsPointerDetector))
-#define KMS_POINTER_DETECTOR_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST((klass),KMS_TYPE_POINTER_DETECTOR,KmsPointerDetectorClass))
+#define KMS_TYPE_POINTER_DETECTOR   (kms_pointer_detectix_get_type())
+#define KMS_POINTER_DETECTOR(obj)   (G_TYPE_CHECK_INSTANCE_CAST((obj),KMS_TYPE_POINTER_DETECTOR,KmsPointerDetectix))
+#define KMS_POINTER_DETECTOR_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST((klass),KMS_TYPE_POINTER_DETECTOR,KmsPointerDetectixClass))
 #define KMS_IS_POINTER_DETECTOR(obj)   (G_TYPE_CHECK_INSTANCE_TYPE((obj),KMS_TYPE_POINTER_DETECTOR))
 #define KMS_IS_POINTER_DETECTOR_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE((klass),KMS_TYPE_POINTER_DETECTOR))
-typedef struct _KmsPointerDetector KmsPointerDetector;
-typedef struct _KmsPointerDetectorClass KmsPointerDetectorClass;
-typedef struct _KmsPointerDetectorPrivate KmsPointerDetectorPrivate;
+typedef struct _KmsPointerDetectix KmsPointerDetectix;
+typedef struct _KmsPointerDetectixClass KmsPointerDetectixClass;
+typedef struct _KmsPointerDetectixPrivate KmsPointerDetectixPrivate;
 
 typedef struct _ButtonStruct {
     CvRect cvButtonLayout;
@@ -41,22 +41,22 @@ typedef struct _ButtonStruct {
     gdouble transparency;
 } ButtonStruct;
 
-struct _KmsPointerDetector {
-  GstVideoFilter base_pointerdetector;
+struct _KmsPointerDetectix {
+  GstVideoFilter base_pointerdetectix;
 
-  KmsPointerDetectorPrivate *priv;
+  KmsPointerDetectixPrivate *priv;
 };
 
-struct _KmsPointerDetectorClass {
-  GstVideoFilterClass base_pointerdetector_class;
+struct _KmsPointerDetectixClass {
+  GstVideoFilterClass base_pointerdetectix_class;
 
   /* Actions */
-  void (*calibrate_color) (KmsPointerDetector *pointerdetector);
+  void (*calibrate_color) (KmsPointerDetectix *pointerdetectix);
 };
 
-GType kms_pointer_detector_get_type (void);
+GType kms_pointer_detectix_get_type (void);
 
-gboolean kms_pointer_detector_plugin_init (GstPlugin * plugin);
+gboolean kms_pointer_detectix_plugin_init (GstPlugin * plugin);
 
 G_END_DECLS
 #endif

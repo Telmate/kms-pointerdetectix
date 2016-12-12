@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: Kurento Pointer Detector Filter
-Source: https://github.com/Kurento/kms-pointerdetector
+Upstream-Name: Kurento Pointer Detectix Filter
+Source: https://github.com/Kurento/kms-pointerdetectix
 
 Files: *
 Copyright: Copyright 2013 Kurento <kurento@kurento.com>

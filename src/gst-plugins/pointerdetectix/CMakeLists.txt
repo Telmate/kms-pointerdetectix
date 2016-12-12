@@ -8,13 +8,13 @@ include_directories(
 )
 
 set(POINTERDETECTOR_SOURCES
-  pointerdetector.c
-  kmspointerdetector.c kmspointerdetector.h
+  pointerdetectix.c
+  kmspointerdetectix.c kmspointerdetectix.h
 )
 
-add_library(pointerdetector MODULE ${POINTERDETECTOR_SOURCES})
+add_library(pointerdetectix MODULE ${POINTERDETECTOR_SOURCES})
 
-target_link_libraries(pointerdetector
+target_link_libraries(pointerdetectix
   kmsgstcommons
   ${GSTREAMER_LIBRARIES}
   ${GSTREAMER_VIDEO_LIBRARIES}
@@ -23,7 +23,7 @@ target_link_libraries(pointerdetector
 )
 
 install(
-  TARGETS pointerdetector
+  TARGETS pointerdetectix
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_GST_PLUGINS_DIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

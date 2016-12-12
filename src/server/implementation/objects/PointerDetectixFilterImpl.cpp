@@ -19,17 +19,17 @@
 #include "MediaPipeline.hpp"
 #include "MediaPipelineImpl.hpp"
 #include "WindowParam.hpp"
-#include "PointerDetectorWindowMediaParam.hpp"
-#include <PointerDetectorFilterImplFactory.hpp>
-#include "PointerDetectorFilterImpl.hpp"
+#include "PointerDetectixWindowMediaParam.hpp"
+#include <PointerDetectixFilterImplFactory.hpp>
+#include "PointerDetectixFilterImpl.hpp"
 #include <jsonrpc/JsonSerializer.hpp>
 #include <KurentoException.hpp>
 #include <gst/gst.h>
 #include "SignalHandler.hpp"
 
-#define GST_CAT_DEFAULT kurento_pointer_detector_filter_impl
+#define GST_CAT_DEFAULT kurento_pointer_detectix_filter_impl
 GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
-#define GST_DEFAULT_NAME "KurentoPointerDetectorFilterImpl"
+#define GST_DEFAULT_NAME "KurentoPointerDetectixFilterImpl"
 
 #define WINDOWS_LAYOUT "windows-layout"
 #define CALIBRATION_AREA "calibration-area"
@@ -39,10 +39,10 @@ namespace kurento
 {
 namespace module
 {
-namespace pointerdetector
+namespace pointerdetectix
 {
 static GstStructure *
-get_structure_from_window (std::shared_ptr<PointerDetectorWindowMediaParam>
+get_structure_from_window (std::shared_ptr<PointerDetectixWindowMediaParam>
                            window)
 {
   GstStructure *buttonsLayoutAux;
@@ -74,14 +74,14 @@ get_structure_from_window (std::shared_ptr<PointerDetectorWindowMediaParam>
   return buttonsLayoutAux;
 }
 
-void PointerDetectorFilterImpl::busMessage (GstMessage *message)
+void PointerDetectixFilterImpl::busMessage (GstMessage *message)
 {
   const GstStructure *st;
   gchar *windowID;
   const gchar *type;
   std::string windowIDStr, typeStr;
 
-  if (GST_MESSAGE_SRC (message) != GST_OBJECT (pointerDetector) ||
+  if (GST_MESSAGE_SRC (message) != GST_OBJECT (pointerDetectix) ||
       GST_MESSAGE_TYPE (message) != GST_MESSAGE_ELEMENT) {
     return;
   }
@@ -122,7 +122,7 @@ void PointerDetectorFilterImpl::busMessage (GstMessage *message)
   }
 }
 
-void PointerDetectorFilterImpl::postConstructor ()
+void PointerDetectixFilterImpl::postConstructor ()
 {
   GstBus *bus;
   std::shared_ptr<MediaPipelineImpl> pipe;
@@ -136,30 +136,30 @@ void PointerDetectorFilterImpl::postConstructor ()
   bus_handler_id = register_signal_handler (G_OBJECT (bus),
                    "message",
                    std::function <void (GstElement *, GstMessage *) >
-                   (std::bind (&PointerDetectorFilterImpl::busMessage, this,
+                   (std::bind (&PointerDetectixFilterImpl::busMessage, this,
                                std::placeholders::_2) ),
-                   std::dynamic_pointer_cast<PointerDetectorFilterImpl>
+                   std::dynamic_pointer_cast<PointerDetectixFilterImpl>
                    (shared_from_this() ) );
 
   g_object_unref (bus);
 }
 
-PointerDetectorFilterImpl::PointerDetectorFilterImpl (const
+PointerDetectixFilterImpl::PointerDetectixFilterImpl (const
     boost::property_tree::ptree &config,
     std::shared_ptr<MediaPipeline> mediaPipeline,
     std::shared_ptr<WindowParam> calibrationRegion,
-    const std::vector<std::shared_ptr<PointerDetectorWindowMediaParam>> &windows)  :
+    const std::vector<std::shared_ptr<PointerDetectixWindowMediaParam>> &windows)  :
   FilterImpl (config, std::dynamic_pointer_cast<MediaPipelineImpl>
               (mediaPipeline) )
 {
   GstStructure *calibrationArea;
   GstStructure *buttonsLayout;
 
-  g_object_set (element, "filter-factory", "pointerdetector", NULL);
+  g_object_set (element, "filter-factory", "pointerdetectix", NULL);
 
-  g_object_get (G_OBJECT (element), "filter", &pointerDetector, NULL);
+  g_object_get (G_OBJECT (element), "filter", &pointerDetectix, NULL);
 
-  if (pointerDetector == NULL) {
+  if (pointerDetectix == NULL) {
     g_object_unref (bus);
     throw KurentoException (MEDIA_OBJECT_NOT_AVAILABLE,
                             "Media Object not available");
@@ -172,7 +172,7 @@ PointerDetectorFilterImpl::PointerDetectorFilterImpl (const
                       "width", G_TYPE_INT, calibrationRegion->getWidth(),
                       "height", G_TYPE_INT, calibrationRegion->getHeight(),
                       NULL);
-  g_object_set (G_OBJECT (pointerDetector), CALIBRATION_AREA,
+  g_object_set (G_OBJECT (pointerDetectix), CALIBRATION_AREA,
                 calibrationArea, NULL);
   gst_structure_free (calibrationArea);
 
@@ -189,16 +189,16 @@ PointerDetectorFilterImpl::PointerDetectorFilterImpl (const
     gst_structure_free (buttonsLayoutAux);
   }
 
-  g_object_set (G_OBJECT (pointerDetector), WINDOWS_LAYOUT, buttonsLayout,
+  g_object_set (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, buttonsLayout,
                 NULL);
   gst_structure_free (buttonsLayout);
 
   bus_handler_id = 0;
-  // There is no need to reference pointerdetector because its life cycle is the same as the filter life cycle
-  g_object_unref (pointerDetector);
+  // There is no need to reference pointerdetectix because its life cycle is the same as the filter life cycle
+  g_object_unref (pointerDetectix);
 }
 
-PointerDetectorFilterImpl::~PointerDetectorFilterImpl()
+PointerDetectixFilterImpl::~PointerDetectixFilterImpl()
 {
   std::shared_ptr<MediaPipelineImpl> pipe;
 
@@ -211,48 +211,48 @@ PointerDetectorFilterImpl::~PointerDetectorFilterImpl()
 }
 
 
-void PointerDetectorFilterImpl::addWindow (
-  std::shared_ptr<PointerDetectorWindowMediaParam> window)
+void PointerDetectixFilterImpl::addWindow (
+  std::shared_ptr<PointerDetectixWindowMediaParam> window)
 {
   GstStructure *buttonsLayout, *buttonsLayoutAux;
 
   buttonsLayoutAux = get_structure_from_window (window);
 
   /* The function obtains the actual window list */
-  g_object_get (G_OBJECT (pointerDetector), WINDOWS_LAYOUT, &buttonsLayout,
+  g_object_get (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, &buttonsLayout,
                 NULL);
   gst_structure_set (buttonsLayout,
                      window->getId().c_str(), GST_TYPE_STRUCTURE,
                      buttonsLayoutAux, NULL);
 
-  g_object_set (G_OBJECT (pointerDetector), WINDOWS_LAYOUT, buttonsLayout, NULL);
+  g_object_set (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, buttonsLayout, NULL);
 
   gst_structure_free (buttonsLayout);
   gst_structure_free (buttonsLayoutAux);
 }
 
-void PointerDetectorFilterImpl::clearWindows ()
+void PointerDetectixFilterImpl::clearWindows ()
 {
   GstStructure *buttonsLayout;
 
   buttonsLayout = gst_structure_new_empty  ("buttonsLayout");
-  g_object_set (G_OBJECT (pointerDetector), WINDOWS_LAYOUT, buttonsLayout,
+  g_object_set (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, buttonsLayout,
                 NULL);
   gst_structure_free (buttonsLayout);
 }
 
-void PointerDetectorFilterImpl::trackColorFromCalibrationRegion ()
+void PointerDetectixFilterImpl::trackColorFromCalibrationRegion ()
 {
-  g_signal_emit_by_name (pointerDetector, CALIBRATE_COLOR, NULL);
+  g_signal_emit_by_name (pointerDetectix, CALIBRATE_COLOR, NULL);
 }
 
-void PointerDetectorFilterImpl::removeWindow (const std::string &windowId)
+void PointerDetectixFilterImpl::removeWindow (const std::string &windowId)
 {
   GstStructure *buttonsLayout;
   gint len;
 
   /* The function obtains the actual window list */
-  g_object_get (G_OBJECT (pointerDetector), WINDOWS_LAYOUT, &buttonsLayout,
+  g_object_get (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, &buttonsLayout,
                 NULL);
   len = gst_structure_n_fields (buttonsLayout);
 
@@ -272,32 +272,32 @@ void PointerDetectorFilterImpl::removeWindow (const std::string &windowId)
   }
 
   /* Set the buttons layout list without the window with id = id */
-  g_object_set (G_OBJECT (pointerDetector), WINDOWS_LAYOUT, buttonsLayout, NULL);
+  g_object_set (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, buttonsLayout, NULL);
 
   gst_structure_free (buttonsLayout);
 }
 
 MediaObjectImpl *
-PointerDetectorFilterImplFactory::createObject (const
+PointerDetectixFilterImplFactory::createObject (const
     boost::property_tree::ptree &config,
     std::shared_ptr<MediaPipeline> mediaPipeline,
     std::shared_ptr<WindowParam> calibrationRegion,
-    const std::vector<std::shared_ptr<PointerDetectorWindowMediaParam>> &windows)
+    const std::vector<std::shared_ptr<PointerDetectixWindowMediaParam>> &windows)
 const
 {
-  return new PointerDetectorFilterImpl (config, mediaPipeline, calibrationRegion,
+  return new PointerDetectixFilterImpl (config, mediaPipeline, calibrationRegion,
                                         windows);
 }
 
-PointerDetectorFilterImpl::StaticConstructor
-PointerDetectorFilterImpl::staticConstructor;
+PointerDetectixFilterImpl::StaticConstructor
+PointerDetectixFilterImpl::staticConstructor;
 
-PointerDetectorFilterImpl::StaticConstructor::StaticConstructor()
+PointerDetectixFilterImpl::StaticConstructor::StaticConstructor()
 {
   GST_DEBUG_CATEGORY_INIT (GST_CAT_DEFAULT, GST_DEFAULT_NAME, 0,
                            GST_DEFAULT_NAME);
 }
 
-} /* pointerdetector */
+} /* pointerdetectix */
 } /* module */
 } /* kurento */

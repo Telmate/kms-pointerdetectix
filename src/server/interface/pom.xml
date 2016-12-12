@@ -2,7 +2,7 @@
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <modelVersion>4.0.0</modelVersion>
 
-        <description>Kurento Pointer Detector module</description>
+        <description>Kurento Pointer Detectix module</description>
         <url>http://www.kurento.org/</url>
 
         <licenses>
@@ -23,9 +23,9 @@
         </developers>
 
         <scm>
-          <url>https://github.com/Kurento/kms-pointerdetector</url>
-          <connection>scm:git:https://github.com/Kurento/kms-pointerdetector.git</connection>
-          <developerConnection>scm:git:ssh://git@github.com:Kurento/kms-pointerdetector.git</developerConnection>
+          <url>https://github.com/Kurento/kms-pointerdetectix</url>
+          <connection>scm:git:https://github.com/Kurento/kms-pointerdetectix.git</connection>
+          <developerConnection>scm:git:ssh://git@github.com:Kurento/kms-pointerdetectix.git</developerConnection>
         </scm>
 
 </project>

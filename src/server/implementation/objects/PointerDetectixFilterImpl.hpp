@@ -19,7 +19,7 @@
 #define __POINTER_DETECTOR_FILTER_IMPL_HPP__
 
 #include "FilterImpl.hpp"
-#include "PointerDetectorFilter.hpp"
+#include "PointerDetectixFilter.hpp"
 #include <EventHandler.hpp>
 #include <boost/property_tree/ptree.hpp>
 
@@ -27,17 +27,17 @@ namespace kurento
 {
 namespace module
 {
-namespace pointerdetector
+namespace pointerdetectix
 {
-class PointerDetectorFilterImpl;
-} /* pointerdetector */
+class PointerDetectixFilterImpl;
+} /* pointerdetectix */
 } /* module */
 } /* kurento */
 
 namespace kurento
 {
 void Serialize (
-  std::shared_ptr<kurento::module::pointerdetector::PointerDetectorFilterImpl>
+  std::shared_ptr<kurento::module::pointerdetectix::PointerDetectixFilterImpl>
   &object, JsonSerializer &serializer);
 } /* kurento */
 
@@ -45,11 +45,11 @@ namespace kurento
 {
 namespace module
 {
-namespace pointerdetector
+namespace pointerdetectix
 {
 class WindowParam;
-class PointerDetectorWindowMediaParam;
-} /* pointerdetector */
+class PointerDetectixWindowMediaParam;
+} /* pointerdetectix */
 } /* module */
 } /* kurento */
 
@@ -62,23 +62,23 @@ namespace kurento
 {
 namespace module
 {
-namespace pointerdetector
+namespace pointerdetectix
 {
 
-class PointerDetectorFilterImpl : public FilterImpl,
-  public virtual PointerDetectorFilter
+class PointerDetectixFilterImpl : public FilterImpl,
+  public virtual PointerDetectixFilter
 {
 
 public:
 
-  PointerDetectorFilterImpl (const boost::property_tree::ptree &config,
+  PointerDetectixFilterImpl (const boost::property_tree::ptree &config,
                              std::shared_ptr<MediaPipeline> mediaPipeline,
                              std::shared_ptr<WindowParam> calibrationRegion,
-                             const std::vector<std::shared_ptr<PointerDetectorWindowMediaParam>> &windows);
+                             const std::vector<std::shared_ptr<PointerDetectixWindowMediaParam>> &windows);
 
-  virtual ~PointerDetectorFilterImpl ();
+  virtual ~PointerDetectixFilterImpl ();
 
-  void addWindow (std::shared_ptr<PointerDetectorWindowMediaParam> window);
+  void addWindow (std::shared_ptr<PointerDetectixWindowMediaParam> window);
   void clearWindows ();
   void trackColorFromCalibrationRegion ();
   void removeWindow (const std::string &windowId);
@@ -100,7 +100,7 @@ protected:
 
 private:
 
-  GstElement *pointerDetector;
+  GstElement *pointerDetectix;
   gulong bus_handler_id;
   void busMessage (GstMessage *message);
 
@@ -114,7 +114,7 @@ private:
 
 };
 
-} /* pointerdetector */
+} /* pointerdetectix */
 } /* module */
 } /* kurento */
 

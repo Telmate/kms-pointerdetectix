@@ -29,19 +29,19 @@
 #include <errno.h>
 #include <libsoup/soup.h>
 
-#include "kmspointerdetector.h"
+#include "kmspointerdetectix.h"
 #include <commons/kms-core-marshal.h>
 
-#define PLUGIN_NAME "pointerdetector"
+#define PLUGIN_NAME "pointerdetectix"
 
-GST_DEBUG_CATEGORY_STATIC (kms_pointer_detector_debug_category);
-#define GST_CAT_DEFAULT kms_pointer_detector_debug_category
+GST_DEBUG_CATEGORY_STATIC (kms_pointer_detectix_debug_category);
+#define GST_CAT_DEFAULT kms_pointer_detectix_debug_category
 
 #define KMS_POINTER_DETECTOR_GET_PRIVATE(obj) ( \
   G_TYPE_INSTANCE_GET_PRIVATE (                  \
     (obj),                                       \
     KMS_TYPE_POINTER_DETECTOR,                  \
-    KmsPointerDetectorPrivate                   \
+    KmsPointerDetectixPrivate                   \
   )                                              \
 )
 
@@ -77,9 +77,9 @@ enum
   LAST_SIGNAL
 };
 
-static guint kms_pointer_detector_signals[LAST_SIGNAL] = { 0 };
+static guint kms_pointer_detectix_signals[LAST_SIGNAL] = { 0 };
 
-struct _KmsPointerDetectorPrivate
+struct _KmsPointerDetectixPrivate
 {
   IplImage *cvImage;
   CvPoint finalPointerPosition;
@@ -108,10 +108,10 @@ struct _KmsPointerDetectorPrivate
 
 /* class initialization */
 
-G_DEFINE_TYPE_WITH_CODE (KmsPointerDetector, kms_pointer_detector,
+G_DEFINE_TYPE_WITH_CODE (KmsPointerDetectix, kms_pointer_detectix,
     GST_TYPE_VIDEO_FILTER,
-    GST_DEBUG_CATEGORY_INIT (kms_pointer_detector_debug_category, PLUGIN_NAME,
-        0, "debug category for pointerdetector element"));
+    GST_DEBUG_CATEGORY_INIT (kms_pointer_detectix_debug_category, PLUGIN_NAME,
+        0, "debug category for pointerdetectix element"));
 
 static void
 dispose_button_struct (gpointer data)
@@ -131,12 +131,12 @@ dispose_button_struct (gpointer data)
 }
 
 static void
-kms_pointer_detector_dispose_buttons_layout_list (KmsPointerDetector *
-    pointerdetector)
+kms_pointer_detectix_dispose_buttons_layout_list (KmsPointerDetectix *
+    pointerdetectix)
 {
-  g_slist_free_full (pointerdetector->priv->buttonsLayoutList,
+  g_slist_free_full (pointerdetectix->priv->buttonsLayoutList,
       dispose_button_struct);
-  pointerdetector->priv->buttonsLayoutList = NULL;
+  pointerdetectix->priv->buttonsLayoutList = NULL;
 }
 
 static gboolean
@@ -202,28 +202,28 @@ load_image (gchar * uri, gchar * dir, gchar * image_name,
 }
 
 static void
-kms_pointer_detector_load_buttonsLayout (KmsPointerDetector * pointerdetector)
+kms_pointer_detectix_load_buttonsLayout (KmsPointerDetectix * pointerdetectix)
 {
   int aux, len;
   gboolean have_inactive_icon, have_active_icon, have_transparency;
   gchar *inactive_uri, *active_uri;
 
-  if (pointerdetector->priv->buttonsLayoutList != NULL) {
-    kms_pointer_detector_dispose_buttons_layout_list (pointerdetector);
+  if (pointerdetectix->priv->buttonsLayoutList != NULL) {
+    kms_pointer_detectix_dispose_buttons_layout_list (pointerdetectix);
   }
 
-  len = gst_structure_n_fields (pointerdetector->priv->buttonsLayout);
+  len = gst_structure_n_fields (pointerdetectix->priv->buttonsLayout);
   GST_DEBUG ("len: %d", len);
 
   for (aux = 0; aux < len; aux++) {
     const gchar *name =
-        gst_structure_nth_field_name (pointerdetector->priv->buttonsLayout,
+        gst_structure_nth_field_name (pointerdetectix->priv->buttonsLayout,
         aux);
     GstStructure *button;
     gboolean ret;
 
     ret =
-        gst_structure_get (pointerdetector->priv->buttonsLayout, name,
+        gst_structure_get (pointerdetectix->priv->buttonsLayout, name,
         GST_TYPE_STRUCTURE, &button, NULL);
     if (ret) {
       ButtonStruct *structAux = g_malloc0 (sizeof (ButtonStruct));
@@ -250,7 +250,7 @@ kms_pointer_detector_load_buttonsLayout (KmsPointerDetector * pointerdetector)
 
       if (have_inactive_icon) {
         aux =
-            load_image (inactive_uri, pointerdetector->priv->images_dir,
+            load_image (inactive_uri, pointerdetectix->priv->images_dir,
             structAux->id, INACTIVE_IMAGE_VARIANT_NAME);
 
         if (aux != NULL) {
@@ -269,7 +269,7 @@ kms_pointer_detector_load_buttonsLayout (KmsPointerDetector * pointerdetector)
 
       if (have_active_icon) {
         aux =
-            load_image (active_uri, pointerdetector->priv->images_dir,
+            load_image (active_uri, pointerdetectix->priv->images_dir,
             structAux->id, ACTIVE_IMAGE_VARIANT_NAME);
 
         if (aux != NULL) {
@@ -295,8 +295,8 @@ kms_pointer_detector_load_buttonsLayout (KmsPointerDetector * pointerdetector)
       GST_DEBUG ("check: %d %d %d %d", structAux->cvButtonLayout.x,
           structAux->cvButtonLayout.y, structAux->cvButtonLayout.width,
           structAux->cvButtonLayout.height);
-      pointerdetector->priv->buttonsLayoutList =
-          g_slist_append (pointerdetector->priv->buttonsLayoutList, structAux);
+      pointerdetectix->priv->buttonsLayoutList =
+          g_slist_append (pointerdetectix->priv->buttonsLayoutList, structAux);
       gst_structure_free (button);
 
       if (have_inactive_icon) {
@@ -310,40 +310,40 @@ kms_pointer_detector_load_buttonsLayout (KmsPointerDetector * pointerdetector)
 }
 
 static void
-kms_pointer_detector_init (KmsPointerDetector * pointerdetector)
+kms_pointer_detectix_init (KmsPointerDetectix * pointerdetectix)
 {
-  pointerdetector->priv = KMS_POINTER_DETECTOR_GET_PRIVATE (pointerdetector);
+  pointerdetectix->priv = KMS_POINTER_DETECTOR_GET_PRIVATE (pointerdetectix);
 
-  pointerdetector->priv->cvImage = NULL;
-  pointerdetector->priv->iteration = 0;
-  pointerdetector->priv->show_debug_info = FALSE;
-  pointerdetector->priv->buttonsLayout = NULL;
-  pointerdetector->priv->buttonsLayoutList = NULL;
-  pointerdetector->priv->putMessage = TRUE;
-  pointerdetector->priv->show_windows_layout = TRUE;
+  pointerdetectix->priv->cvImage = NULL;
+  pointerdetectix->priv->iteration = 0;
+  pointerdetectix->priv->show_debug_info = FALSE;
+  pointerdetectix->priv->buttonsLayout = NULL;
+  pointerdetectix->priv->buttonsLayoutList = NULL;
+  pointerdetectix->priv->putMessage = TRUE;
+  pointerdetectix->priv->show_windows_layout = TRUE;
 
-  pointerdetector->priv->h_min = 0;
-  pointerdetector->priv->h_max = 0;
-  pointerdetector->priv->s_min = 0;
-  pointerdetector->priv->s_max = 0;
+  pointerdetectix->priv->h_min = 0;
+  pointerdetectix->priv->h_max = 0;
+  pointerdetectix->priv->s_min = 0;
+  pointerdetectix->priv->s_max = 0;
 
-  pointerdetector->priv->x_calibration = 0;
-  pointerdetector->priv->y_calibration = 0;
-  pointerdetector->priv->width_calibration = 0;
-  pointerdetector->priv->height_calibration = 0;
+  pointerdetectix->priv->x_calibration = 0;
+  pointerdetectix->priv->y_calibration = 0;
+  pointerdetectix->priv->width_calibration = 0;
+  pointerdetectix->priv->height_calibration = 0;
 
   gchar d[] = TEMP_PATH;
   gchar *aux = g_mkdtemp (d);
 
-  pointerdetector->priv->images_dir = g_strdup (aux);
-  pointerdetector->priv->kernel1 =
+  pointerdetectix->priv->images_dir = g_strdup (aux);
+  pointerdetectix->priv->kernel1 =
       cvCreateStructuringElementEx (21, 21, 10, 10, CV_SHAPE_RECT, NULL);
-  pointerdetector->priv->kernel2 =
+  pointerdetectix->priv->kernel2 =
       cvCreateStructuringElementEx (11, 11, 5, 5, CV_SHAPE_RECT, NULL);
 }
 
 static void
-kms_pointer_detector_calibrate_color (KmsPointerDetector * pointerdetector)
+kms_pointer_detectix_calibrate_color (KmsPointerDetectix * pointerdetectix)
 {
   gint h_values[H_VALUES];
   gint s_values[S_VALUES];
@@ -351,32 +351,32 @@ kms_pointer_detector_calibrate_color (KmsPointerDetector * pointerdetector)
   IplImage *calibration_area;
   gint i, j;
 
-  if (pointerdetector->priv->cvImage == NULL) {
+  if (pointerdetectix->priv->cvImage == NULL) {
     return;
   }
 
   memset (h_values, 0, H_VALUES * sizeof (gint));
   memset (s_values, 0, S_VALUES * sizeof (gint));
   calibration_area =
-      cvCreateImage (cvSize (pointerdetector->priv->width_calibration,
-          pointerdetector->priv->height_calibration), IPL_DEPTH_8U, 3);
+      cvCreateImage (cvSize (pointerdetectix->priv->width_calibration,
+          pointerdetectix->priv->height_calibration), IPL_DEPTH_8U, 3);
   h_channel = cvCreateImage (cvGetSize (calibration_area), 8, 1);
   s_channel = cvCreateImage (cvGetSize (calibration_area), 8, 1);
 
   GST_DEBUG ("REGION x %d y %d  width %d height %d\n",
-      pointerdetector->priv->x_calibration,
-      pointerdetector->priv->y_calibration,
-      pointerdetector->priv->width_calibration,
-      pointerdetector->priv->height_calibration);
+      pointerdetectix->priv->x_calibration,
+      pointerdetectix->priv->y_calibration,
+      pointerdetectix->priv->width_calibration,
+      pointerdetectix->priv->height_calibration);
 
-  GST_OBJECT_LOCK (pointerdetector);
-  cvSetImageROI (pointerdetector->priv->cvImage,
-      cvRect (pointerdetector->priv->x_calibration,
-          pointerdetector->priv->y_calibration,
-          pointerdetector->priv->width_calibration,
-          pointerdetector->priv->height_calibration));
-  cvCopy (pointerdetector->priv->cvImage, calibration_area, 0);
-  cvResetImageROI (pointerdetector->priv->cvImage);
+  GST_OBJECT_LOCK (pointerdetectix);
+  cvSetImageROI (pointerdetectix->priv->cvImage,
+      cvRect (pointerdetectix->priv->x_calibration,
+          pointerdetectix->priv->y_calibration,
+          pointerdetectix->priv->width_calibration,
+          pointerdetectix->priv->height_calibration));
+  cvCopy (pointerdetectix->priv->cvImage, calibration_area, 0);
+  cvResetImageROI (pointerdetectix->priv->cvImage);
 
   cvCvtColor (calibration_area, calibration_area, CV_BGR2HSV);
   cvSplit (calibration_area, h_channel, s_channel, NULL, NULL);
@@ -392,32 +392,32 @@ kms_pointer_detector_calibrate_color (KmsPointerDetector * pointerdetector)
 
   for (i = 1; i < H_MAX; i++) {
     if (h_values[i] >= HIST_THRESHOLD) {
-      pointerdetector->priv->h_min = i - 5;
+      pointerdetectix->priv->h_min = i - 5;
       break;
     }
   }
   for (i = H_MAX; i >= 0; i--) {
     if (h_values[i] >= HIST_THRESHOLD) {
-      pointerdetector->priv->h_max = i + 5;
+      pointerdetectix->priv->h_max = i + 5;
       break;
     }
   }
   for (i = 1; i < S_MAX; i++) {
     if (s_values[i] >= HIST_THRESHOLD) {
-      pointerdetector->priv->s_min = i - 5;
+      pointerdetectix->priv->s_min = i - 5;
       break;
     }
   }
   for (i = S_MAX; i >= 0; i--) {
     if (s_values[i] >= HIST_THRESHOLD) {
-      pointerdetector->priv->s_max = i + 5;
+      pointerdetectix->priv->s_max = i + 5;
       break;
     }
   }
-  GST_OBJECT_UNLOCK (pointerdetector);
+  GST_OBJECT_UNLOCK (pointerdetectix);
   GST_DEBUG ("COLOR TO TRACK h_min %d h_max %d s_min %d s_max %d",
-      pointerdetector->priv->h_min, pointerdetector->priv->h_max,
-      pointerdetector->priv->s_min, pointerdetector->priv->s_max);
+      pointerdetectix->priv->h_min, pointerdetectix->priv->h_max,
+      pointerdetectix->priv->s_min, pointerdetectix->priv->s_max);
 
   cvReleaseImage (&h_channel);
   cvReleaseImage (&s_channel);
@@ -425,41 +425,41 @@ kms_pointer_detector_calibrate_color (KmsPointerDetector * pointerdetector)
 }
 
 void
-kms_pointer_detector_set_property (GObject * object, guint property_id,
+kms_pointer_detectix_set_property (GObject * object, guint property_id,
     const GValue * value, GParamSpec * pspec)
 {
-  KmsPointerDetector *pointerdetector = KMS_POINTER_DETECTOR (object);
+  KmsPointerDetectix *pointerdetectix = KMS_POINTER_DETECTOR (object);
 
-  GST_OBJECT_LOCK (pointerdetector);
+  GST_OBJECT_LOCK (pointerdetectix);
   switch (property_id) {
     case PROP_SHOW_DEBUG_INFO:
-      pointerdetector->priv->show_debug_info = g_value_get_boolean (value);
+      pointerdetectix->priv->show_debug_info = g_value_get_boolean (value);
       break;
     case PROP_WINDOWS_LAYOUT:
-      if (pointerdetector->priv->buttonsLayout != NULL)
-        gst_structure_free (pointerdetector->priv->buttonsLayout);
+      if (pointerdetectix->priv->buttonsLayout != NULL)
+        gst_structure_free (pointerdetectix->priv->buttonsLayout);
 
-      pointerdetector->priv->buttonsLayout = g_value_dup_boxed (value);
-      kms_pointer_detector_load_buttonsLayout (pointerdetector);
+      pointerdetectix->priv->buttonsLayout = g_value_dup_boxed (value);
+      kms_pointer_detectix_load_buttonsLayout (pointerdetectix);
       break;
     case PROP_MESSAGE:
-      pointerdetector->priv->putMessage = g_value_get_boolean (value);
+      pointerdetectix->priv->putMessage = g_value_get_boolean (value);
       break;
     case PROP_SHOW_WINDOWS_LAYOUT:
-      pointerdetector->priv->show_windows_layout = g_value_get_boolean (value);
+      pointerdetectix->priv->show_windows_layout = g_value_get_boolean (value);
       break;
     case PROP_CALIBRATION_AREA:{
       GstStructure *aux;
 
       aux = g_value_dup_boxed (value);
       gst_structure_get (aux, "x", G_TYPE_INT,
-          &pointerdetector->priv->x_calibration, NULL);
+          &pointerdetectix->priv->x_calibration, NULL);
       gst_structure_get (aux, "y", G_TYPE_INT,
-          &pointerdetector->priv->y_calibration, NULL);
+          &pointerdetectix->priv->y_calibration, NULL);
       gst_structure_get (aux, "width", G_TYPE_INT,
-          &pointerdetector->priv->width_calibration, NULL);
+          &pointerdetectix->priv->width_calibration, NULL);
       gst_structure_get (aux, "height", G_TYPE_INT,
-          &pointerdetector->priv->height_calibration, NULL);
+          &pointerdetectix->priv->height_calibration, NULL);
       gst_structure_free (aux);
       break;
     }
@@ -467,40 +467,40 @@ kms_pointer_detector_set_property (GObject * object, guint property_id,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
       break;
   }
-  GST_OBJECT_UNLOCK (pointerdetector);
+  GST_OBJECT_UNLOCK (pointerdetectix);
 }
 
 void
-kms_pointer_detector_get_property (GObject * object, guint property_id,
+kms_pointer_detectix_get_property (GObject * object, guint property_id,
     GValue * value, GParamSpec * pspec)
 {
-  KmsPointerDetector *pointerdetector = KMS_POINTER_DETECTOR (object);
+  KmsPointerDetectix *pointerdetectix = KMS_POINTER_DETECTOR (object);
 
   switch (property_id) {
     case PROP_SHOW_DEBUG_INFO:
-      g_value_set_boolean (value, pointerdetector->priv->show_debug_info);
+      g_value_set_boolean (value, pointerdetectix->priv->show_debug_info);
       break;
     case PROP_WINDOWS_LAYOUT:
-      if (pointerdetector->priv->buttonsLayout == NULL) {
-        pointerdetector->priv->buttonsLayout =
+      if (pointerdetectix->priv->buttonsLayout == NULL) {
+        pointerdetectix->priv->buttonsLayout =
             gst_structure_new_empty ("windows");
       }
-      g_value_set_boxed (value, pointerdetector->priv->buttonsLayout);
+      g_value_set_boxed (value, pointerdetectix->priv->buttonsLayout);
       break;
     case PROP_MESSAGE:
-      g_value_set_boolean (value, pointerdetector->priv->putMessage);
+      g_value_set_boolean (value, pointerdetectix->priv->putMessage);
       break;
     case PROP_SHOW_WINDOWS_LAYOUT:
-      g_value_set_boolean (value, pointerdetector->priv->show_windows_layout);
+      g_value_set_boolean (value, pointerdetectix->priv->show_windows_layout);
       break;
     case PROP_CALIBRATION_AREA:{
       GstStructure *aux;
 
       aux = gst_structure_new ("calibration_area",
-          "x", G_TYPE_INT, pointerdetector->priv->x_calibration,
-          "y", G_TYPE_INT, pointerdetector->priv->y_calibration,
-          "width", G_TYPE_INT, pointerdetector->priv->width_calibration,
-          "height", G_TYPE_INT, pointerdetector->priv->height_calibration,
+          "x", G_TYPE_INT, pointerdetectix->priv->x_calibration,
+          "y", G_TYPE_INT, pointerdetectix->priv->y_calibration,
+          "width", G_TYPE_INT, pointerdetectix->priv->width_calibration,
+          "height", G_TYPE_INT, pointerdetectix->priv->height_calibration,
           NULL);
       g_value_set_boxed (value, aux);
       gst_structure_free (aux);
@@ -532,83 +532,83 @@ remove_recursive (const gchar * path)
 }
 
 void
-kms_pointer_detector_finalize (GObject * object)
+kms_pointer_detectix_finalize (GObject * object)
 {
-  KmsPointerDetector *pointerdetector = KMS_POINTER_DETECTOR (object);
+  KmsPointerDetectix *pointerdetectix = KMS_POINTER_DETECTOR (object);
 
-  cvReleaseImageHeader (&pointerdetector->priv->cvImage);
+  cvReleaseImageHeader (&pointerdetectix->priv->cvImage);
 
-  cvReleaseStructuringElement (&pointerdetector->priv->kernel1);
-  cvReleaseStructuringElement (&pointerdetector->priv->kernel2);
+  cvReleaseStructuringElement (&pointerdetectix->priv->kernel1);
+  cvReleaseStructuringElement (&pointerdetectix->priv->kernel2);
 
-  remove_recursive (pointerdetector->priv->images_dir);
-  g_free (pointerdetector->priv->images_dir);
+  remove_recursive (pointerdetectix->priv->images_dir);
+  g_free (pointerdetectix->priv->images_dir);
 
-  if (pointerdetector->priv->previousButtonClickedId != NULL) {
-    g_free (pointerdetector->priv->previousButtonClickedId);
+  if (pointerdetectix->priv->previousButtonClickedId != NULL) {
+    g_free (pointerdetectix->priv->previousButtonClickedId);
   }
 
-  if (pointerdetector->priv->buttonsLayoutList != NULL) {
-    kms_pointer_detector_dispose_buttons_layout_list (pointerdetector);
+  if (pointerdetectix->priv->buttonsLayoutList != NULL) {
+    kms_pointer_detectix_dispose_buttons_layout_list (pointerdetectix);
   }
 
-  if (pointerdetector->priv->buttonsLayout != NULL) {
-    gst_structure_free (pointerdetector->priv->buttonsLayout);
+  if (pointerdetectix->priv->buttonsLayout != NULL) {
+    gst_structure_free (pointerdetectix->priv->buttonsLayout);
   }
 
-  G_OBJECT_CLASS (kms_pointer_detector_parent_class)->finalize (object);
+  G_OBJECT_CLASS (kms_pointer_detectix_parent_class)->finalize (object);
 }
 
 static gboolean
-kms_pointer_detector_start (GstBaseTransform * trans)
+kms_pointer_detectix_start (GstBaseTransform * trans)
 {
-  KmsPointerDetector *pointerdetector = KMS_POINTER_DETECTOR (trans);
+  KmsPointerDetectix *pointerdetectix = KMS_POINTER_DETECTOR (trans);
 
-  GST_DEBUG_OBJECT (pointerdetector, "start");
+  GST_DEBUG_OBJECT (pointerdetectix, "start");
 
   return TRUE;
 }
 
 static gboolean
-kms_pointer_detector_stop (GstBaseTransform * trans)
+kms_pointer_detectix_stop (GstBaseTransform * trans)
 {
-  KmsPointerDetector *pointerdetector = KMS_POINTER_DETECTOR (trans);
+  KmsPointerDetectix *pointerdetectix = KMS_POINTER_DETECTOR (trans);
 
-  GST_DEBUG_OBJECT (pointerdetector, "stop");
+  GST_DEBUG_OBJECT (pointerdetectix, "stop");
 
   return TRUE;
 }
 
 static gboolean
-kms_pointer_detector_set_info (GstVideoFilter * filter, GstCaps * incaps,
+kms_pointer_detectix_set_info (GstVideoFilter * filter, GstCaps * incaps,
     GstVideoInfo * in_info, GstCaps * outcaps, GstVideoInfo * out_info)
 {
-  KmsPointerDetector *pointerdetector = KMS_POINTER_DETECTOR (filter);
+  KmsPointerDetectix *pointerdetectix = KMS_POINTER_DETECTOR (filter);
 
-  GST_DEBUG_OBJECT (pointerdetector, "set_info");
+  GST_DEBUG_OBJECT (pointerdetectix, "set_info");
 
   return TRUE;
 }
 
 static void
-kms_pointer_detector_initialize_images (KmsPointerDetector * pointerdetector,
+kms_pointer_detectix_initialize_images (KmsPointerDetectix * pointerdetectix,
     GstVideoFrame * frame)
 {
-  if (pointerdetector->priv->cvImage == NULL) {
-    pointerdetector->priv->cvImage =
+  if (pointerdetectix->priv->cvImage == NULL) {
+    pointerdetectix->priv->cvImage =
         cvCreateImageHeader (cvSize (frame->info.width, frame->info.height),
         IPL_DEPTH_8U, 3);
-  } else if ((pointerdetector->priv->cvImage->width != frame->info.width)
-      || (pointerdetector->priv->cvImage->height != frame->info.height)) {
-    cvReleaseImageHeader (&pointerdetector->priv->cvImage);
-    pointerdetector->priv->cvImage =
+  } else if ((pointerdetectix->priv->cvImage->width != frame->info.width)
+      || (pointerdetectix->priv->cvImage->height != frame->info.height)) {
+    cvReleaseImageHeader (&pointerdetectix->priv->cvImage);
+    pointerdetectix->priv->cvImage =
         cvCreateImageHeader (cvSize (frame->info.width, frame->info.height),
         IPL_DEPTH_8U, 3);
   }
 }
 
 static gboolean
-kms_pointer_detector_check_pointer_into_button (CvPoint * pointer_position,
+kms_pointer_detectix_check_pointer_into_button (CvPoint * pointer_position,
     ButtonStruct * buttonStruct)
 {
   int downLeftCornerX =
@@ -626,17 +626,17 @@ kms_pointer_detector_check_pointer_into_button (CvPoint * pointer_position,
 }
 
 static void
-kms_pointer_detector_overlay_icon (IplImage * icon,
+kms_pointer_detectix_overlay_icon (IplImage * icon,
     gint x, gint y,
     gdouble transparency,
-    gboolean saturate, KmsPointerDetector * pointerdetector)
+    gboolean saturate, KmsPointerDetectix * pointerdetectix)
 {
   int w, h;
   uchar *row, *image_row;
 
   row = (uchar *) icon->imageData;
-  image_row = (uchar *) pointerdetector->priv->cvImage->imageData +
-      (y * pointerdetector->priv->cvImage->widthStep);
+  image_row = (uchar *) pointerdetectix->priv->cvImage->imageData +
+      (y * pointerdetectix->priv->cvImage->widthStep);
 
   for (h = 0; h < icon->height; h++) {
 
@@ -645,9 +645,9 @@ kms_pointer_detector_overlay_icon (IplImage * icon,
 
     for (w = 0; w < icon->width; w++) {
       /* Check if point is inside overlay boundaries */
-      if (((w + x) < pointerdetector->priv->cvImage->width)
+      if (((w + x) < pointerdetectix->priv->cvImage->width)
           && ((w + x) >= 0)) {
-        if (((h + y) < pointerdetector->priv->cvImage->height)
+        if (((h + y) < pointerdetectix->priv->cvImage->height)
             && ((h + y) >= 0)) {
 
           if (icon->nChannels == 1) {
@@ -684,25 +684,25 @@ kms_pointer_detector_overlay_icon (IplImage * icon,
       }
 
       column += icon->nChannels;
-      image_column += pointerdetector->priv->cvImage->nChannels;
+      image_column += pointerdetectix->priv->cvImage->nChannels;
     }
 
     row += icon->widthStep;
-    image_row += pointerdetector->priv->cvImage->widthStep;
+    image_row += pointerdetectix->priv->cvImage->widthStep;
   }
 }
 
 static void
-kms_pointer_detector_check_pointer_position (KmsPointerDetector *
-    pointerdetector)
+kms_pointer_detectix_check_pointer_position (KmsPointerDetectix *
+    pointerdetectix)
 {
   ButtonStruct *structAux;
   GSList *l;
   int buttonClickedCounter = 0;
   gchar *actualButtonClickedId;
 
-  GST_OBJECT_LOCK (pointerdetector);
-  for (l = pointerdetector->priv->buttonsLayoutList; l != NULL; l = l->next) {
+  GST_OBJECT_LOCK (pointerdetectix);
+  for (l = pointerdetectix->priv->buttonsLayoutList; l != NULL; l = l->next) {
     CvPoint upRightCorner;
     CvPoint downLeftCorner;
     CvScalar color;
@@ -716,8 +716,8 @@ kms_pointer_detector_check_pointer_position (KmsPointerDetector *
     downLeftCorner.y =
         structAux->cvButtonLayout.y + structAux->cvButtonLayout.height;
 
-    if (kms_pointer_detector_check_pointer_into_button
-        (&pointerdetector->priv->finalPointerPosition, structAux)) {
+    if (kms_pointer_detectix_check_pointer_into_button
+        (&pointerdetectix->priv->finalPointerPosition, structAux)) {
       buttonClickedCounter++;
 
       color = GREEN;
@@ -728,80 +728,80 @@ kms_pointer_detector_check_pointer_position (KmsPointerDetector *
       is_active_window = FALSE;;
     }
 
-    if (pointerdetector->priv->show_windows_layout) {
+    if (pointerdetectix->priv->show_windows_layout) {
       if (!is_active_window) {
         if (structAux->inactive_icon != NULL) {
-          kms_pointer_detector_overlay_icon (structAux->inactive_icon,
+          kms_pointer_detectix_overlay_icon (structAux->inactive_icon,
               structAux->cvButtonLayout.x,
               structAux->cvButtonLayout.y,
-              structAux->transparency, FALSE, pointerdetector);
+              structAux->transparency, FALSE, pointerdetectix);
         } else {
-          cvRectangle (pointerdetector->priv->cvImage, upRightCorner,
+          cvRectangle (pointerdetectix->priv->cvImage, upRightCorner,
               downLeftCorner, color, 1, 8, 0);
         }
       } else {
         if (structAux->active_icon != NULL) {
-          kms_pointer_detector_overlay_icon (structAux->active_icon,
+          kms_pointer_detectix_overlay_icon (structAux->active_icon,
               structAux->cvButtonLayout.x,
               structAux->cvButtonLayout.y,
-              structAux->transparency, FALSE, pointerdetector);
+              structAux->transparency, FALSE, pointerdetectix);
         } else if (structAux->inactive_icon != NULL) {
-          kms_pointer_detector_overlay_icon (structAux->inactive_icon,
+          kms_pointer_detectix_overlay_icon (structAux->inactive_icon,
               structAux->cvButtonLayout.x,
               structAux->cvButtonLayout.y,
-              structAux->transparency, TRUE, pointerdetector);
+              structAux->transparency, TRUE, pointerdetectix);
         } else {
-          cvRectangle (pointerdetector->priv->cvImage, upRightCorner,
+          cvRectangle (pointerdetectix->priv->cvImage, upRightCorner,
               downLeftCorner, color, 1, 8, 0);
         }
       }
     }
   }
-  GST_OBJECT_UNLOCK (pointerdetector);
+  GST_OBJECT_UNLOCK (pointerdetectix);
 
   if (buttonClickedCounter == 0) {
-    if (pointerdetector->priv->previousButtonClickedId != NULL) {
+    if (pointerdetectix->priv->previousButtonClickedId != NULL) {
       GstStructure *s;
       GstMessage *m;
 
       /* post a message to bus */
       GST_DEBUG ("exit window: %s",
-          pointerdetector->priv->previousButtonClickedId);
-      if (pointerdetector->priv->putMessage) {
+          pointerdetectix->priv->previousButtonClickedId);
+      if (pointerdetectix->priv->putMessage) {
         s = gst_structure_new ("window-out",
             "window", G_TYPE_STRING,
-            pointerdetector->priv->previousButtonClickedId, NULL);
-        m = gst_message_new_element (GST_OBJECT (pointerdetector), s);
-        gst_element_post_message (GST_ELEMENT (pointerdetector), m);
+            pointerdetectix->priv->previousButtonClickedId, NULL);
+        m = gst_message_new_element (GST_OBJECT (pointerdetectix), s);
+        gst_element_post_message (GST_ELEMENT (pointerdetectix), m);
       }
-      g_free (pointerdetector->priv->previousButtonClickedId);
-      pointerdetector->priv->previousButtonClickedId = NULL;
+      g_free (pointerdetectix->priv->previousButtonClickedId);
+      pointerdetectix->priv->previousButtonClickedId = NULL;
     }
   } else {
-    if (g_strcmp0 (pointerdetector->priv->previousButtonClickedId,
+    if (g_strcmp0 (pointerdetectix->priv->previousButtonClickedId,
             actualButtonClickedId) != 0) {
       GstStructure *s;
       GstMessage *m;
 
       /* post a message to bus */
       GST_DEBUG ("into window: %s", actualButtonClickedId);
-      if (pointerdetector->priv->putMessage) {
+      if (pointerdetectix->priv->putMessage) {
         s = gst_structure_new ("window-in",
             "window", G_TYPE_STRING, actualButtonClickedId, NULL);
-        m = gst_message_new_element (GST_OBJECT (pointerdetector), s);
-        gst_element_post_message (GST_ELEMENT (pointerdetector), m);
+        m = gst_message_new_element (GST_OBJECT (pointerdetectix), s);
+        gst_element_post_message (GST_ELEMENT (pointerdetectix), m);
       }
-      pointerdetector->priv->previousButtonClickedId =
+      pointerdetectix->priv->previousButtonClickedId =
           g_strdup (actualButtonClickedId);
     }
   }
 }
 
 static GstFlowReturn
-kms_pointer_detector_transform_frame_ip (GstVideoFilter * filter,
+kms_pointer_detectix_transform_frame_ip (GstVideoFilter * filter,
     GstVideoFrame * frame)
 {
-  KmsPointerDetector *pointerdetector = KMS_POINTER_DETECTOR (filter);
+  KmsPointerDetectix *pointerdetectix = KMS_POINTER_DETECTOR (filter);
   GstMapInfo info;
   IplImage *color_filter;
   IplImage *hsv_image;
@@ -812,49 +812,49 @@ kms_pointer_detector_transform_frame_ip (GstVideoFilter * filter,
   int best_candidate;
   gint i;
 
-  if ((pointerdetector->priv->x_calibration == 0)
-      && (pointerdetector->priv->y_calibration == 0)
-      && (pointerdetector->priv->width_calibration == 0)
-      && (pointerdetector->priv->height_calibration == 0)) {
+  if ((pointerdetectix->priv->x_calibration == 0)
+      && (pointerdetectix->priv->y_calibration == 0)
+      && (pointerdetectix->priv->width_calibration == 0)
+      && (pointerdetectix->priv->height_calibration == 0)) {
     GST_DEBUG ("Calibration area not defined");
     return GST_FLOW_OK;
   }
 
-  pointerdetector->priv->frameSize =
+  pointerdetectix->priv->frameSize =
       cvSize (frame->info.width, frame->info.height);
-  kms_pointer_detector_initialize_images (pointerdetector, frame);
+  kms_pointer_detectix_initialize_images (pointerdetectix, frame);
   gst_buffer_map (frame->buffer, &info, GST_MAP_READ);
-  pointerdetector->priv->cvImage->imageData = (char *) info.data;
+  pointerdetectix->priv->cvImage->imageData = (char *) info.data;
 
-  cvRectangle (pointerdetector->priv->cvImage,
-      cvPoint (pointerdetector->priv->x_calibration,
-          pointerdetector->priv->y_calibration),
-      cvPoint (pointerdetector->priv->x_calibration
-          + pointerdetector->priv->width_calibration,
-          pointerdetector->priv->y_calibration
-          + pointerdetector->priv->height_calibration), WHITE, 1, 8, 0);
+  cvRectangle (pointerdetectix->priv->cvImage,
+      cvPoint (pointerdetectix->priv->x_calibration,
+          pointerdetectix->priv->y_calibration),
+      cvPoint (pointerdetectix->priv->x_calibration
+          + pointerdetectix->priv->width_calibration,
+          pointerdetectix->priv->y_calibration
+          + pointerdetectix->priv->height_calibration), WHITE, 1, 8, 0);
 
-  if ((pointerdetector->priv->h_min == 0) && (pointerdetector->priv->h_max == 0)
-      && (pointerdetector->priv->s_min == 0)
-      && (pointerdetector->priv->s_max == 0)) {
+  if ((pointerdetectix->priv->h_min == 0) && (pointerdetectix->priv->h_max == 0)
+      && (pointerdetectix->priv->s_min == 0)
+      && (pointerdetectix->priv->s_max == 0)) {
     goto end;
   }
   //detect the coordenates of the pointer
-  hsv_image = cvCreateImage (cvGetSize (pointerdetector->priv->cvImage),
-      pointerdetector->priv->cvImage->depth, 3);
-  cvCvtColor (pointerdetector->priv->cvImage, hsv_image, CV_BGR2HSV);
-  color_filter = cvCreateImage (cvGetSize (pointerdetector->priv->cvImage),
-      pointerdetector->priv->cvImage->depth, 1);
-  GST_OBJECT_LOCK (pointerdetector);
+  hsv_image = cvCreateImage (cvGetSize (pointerdetectix->priv->cvImage),
+      pointerdetectix->priv->cvImage->depth, 3);
+  cvCvtColor (pointerdetectix->priv->cvImage, hsv_image, CV_BGR2HSV);
+  color_filter = cvCreateImage (cvGetSize (pointerdetectix->priv->cvImage),
+      pointerdetectix->priv->cvImage->depth, 1);
+  GST_OBJECT_LOCK (pointerdetectix);
   cvInRangeS (hsv_image,
-      cvScalar (pointerdetector->priv->h_min, pointerdetector->priv->s_min,
-          V_MIN, 0), cvScalar (pointerdetector->priv->h_max,
-          pointerdetector->priv->s_max, V_MAX, 0), color_filter);
-  GST_OBJECT_UNLOCK (pointerdetector);
+      cvScalar (pointerdetectix->priv->h_min, pointerdetectix->priv->s_min,
+          V_MIN, 0), cvScalar (pointerdetectix->priv->h_max,
+          pointerdetectix->priv->s_max, V_MAX, 0), color_filter);
+  GST_OBJECT_UNLOCK (pointerdetectix);
   cvMorphologyEx (color_filter, color_filter, NULL,
-      pointerdetector->priv->kernel1, CV_MOP_CLOSE, 1);
+      pointerdetectix->priv->kernel1, CV_MOP_CLOSE, 1);
   cvMorphologyEx (color_filter, color_filter, NULL,
-      pointerdetector->priv->kernel2, CV_MOP_OPEN, 1);
+      pointerdetectix->priv->kernel2, CV_MOP_OPEN, 1);
 
   hough_image = cvCloneImage (color_filter);
   cvSmooth (hough_image, hough_image, CV_GAUSSIAN, 15, 15, 0, 0);
@@ -870,8 +870,8 @@ kms_pointer_detector_transform_frame_ip (GstVideoFilter * filter,
   if ((circles->total == 1)) {
     float *p = (float *) cvGetSeqElem (circles, 0);
 
-    pointerdetector->priv->finalPointerPosition.x = cvRound (p[0]);
-    pointerdetector->priv->finalPointerPosition.y = cvRound (p[1]);
+    pointerdetectix->priv->finalPointerPosition.x = cvRound (p[0]);
+    pointerdetectix->priv->finalPointerPosition.y = cvRound (p[1]);
     goto checkPoint;
   }
 
@@ -887,14 +887,14 @@ kms_pointer_detector_transform_frame_ip (GstVideoFilter * filter,
       continue;
     }
     current_distance =
-        sqrt (((abs (pointerdetector->priv->finalPointerPosition.x - p[0]) -
-                abs (pointerdetector->priv->finalPointerPosition.x - p[0]))
-            * (abs (pointerdetector->priv->finalPointerPosition.x - p[0]) -
-                abs (pointerdetector->priv->finalPointerPosition.x - p[0])))
-        + ((abs (pointerdetector->priv->finalPointerPosition.y - p[1]) -
-                abs (pointerdetector->priv->finalPointerPosition.y - p[1]))
-            * (abs (pointerdetector->priv->finalPointerPosition.y - p[1]) -
-                abs (pointerdetector->priv->finalPointerPosition.y - p[1]))));
+        sqrt (((abs (pointerdetectix->priv->finalPointerPosition.x - p[0]) -
+                abs (pointerdetectix->priv->finalPointerPosition.x - p[0]))
+            * (abs (pointerdetectix->priv->finalPointerPosition.x - p[0]) -
+                abs (pointerdetectix->priv->finalPointerPosition.x - p[0])))
+        + ((abs (pointerdetectix->priv->finalPointerPosition.y - p[1]) -
+                abs (pointerdetectix->priv->finalPointerPosition.y - p[1]))
+            * (abs (pointerdetectix->priv->finalPointerPosition.y - p[1]) -
+                abs (pointerdetectix->priv->finalPointerPosition.y - p[1]))));
 
     if (current_distance < distance) {
       best_candidate = i;
@@ -902,23 +902,23 @@ kms_pointer_detector_transform_frame_ip (GstVideoFilter * filter,
   }
   float *p = (float *) cvGetSeqElem (circles, best_candidate);
 
-  pointerdetector->priv->finalPointerPosition.x = p[0];
-  pointerdetector->priv->finalPointerPosition.y = p[1];
+  pointerdetectix->priv->finalPointerPosition.x = p[0];
+  pointerdetectix->priv->finalPointerPosition.y = p[1];
 
 checkPoint:
   if (storage != NULL) {
     cvReleaseMemStorage (&storage);
   }
 
-  kms_pointer_detector_check_pointer_position (pointerdetector);
+  kms_pointer_detectix_check_pointer_position (pointerdetectix);
 
-  GST_OBJECT_LOCK (pointerdetector);
-  cvCircle (pointerdetector->priv->cvImage,
-      pointerdetector->priv->finalPointerPosition, 10.0, cvScalar (0, 0, 255,
+  GST_OBJECT_LOCK (pointerdetectix);
+  cvCircle (pointerdetectix->priv->cvImage,
+      pointerdetectix->priv->finalPointerPosition, 10.0, cvScalar (0, 0, 255,
           0), -1, 8, 0);
-  GST_OBJECT_UNLOCK (pointerdetector);
+  GST_OBJECT_UNLOCK (pointerdetectix);
 
-  pointerdetector->priv->iteration++;
+  pointerdetectix->priv->iteration++;
   if (hsv_image != NULL) {
     cvReleaseImage (&hsv_image);
   }
@@ -935,7 +935,7 @@ end:
 }
 
 static void
-kms_pointer_detector_class_init (KmsPointerDetectorClass * klass)
+kms_pointer_detectix_class_init (KmsPointerDetectixClass * klass)
 {
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
   GstBaseTransformClass *base_transform_class =
@@ -952,22 +952,22 @@ kms_pointer_detector_class_init (KmsPointerDetectorClass * klass)
           gst_caps_from_string (VIDEO_SINK_CAPS)));
 
   gst_element_class_set_static_metadata (GST_ELEMENT_CLASS (klass),
-      "Pointer detector element", "Video/Filter",
+      "Pointer detectix element", "Video/Filter",
       "Detects pointer an raises events with its position",
       "Francisco Rivero <fj.riverog@gmail.com>");
 
   klass->calibrate_color =
-      GST_DEBUG_FUNCPTR (kms_pointer_detector_calibrate_color);
+      GST_DEBUG_FUNCPTR (kms_pointer_detectix_calibrate_color);
 
-  gobject_class->set_property = kms_pointer_detector_set_property;
-  gobject_class->get_property = kms_pointer_detector_get_property;
-  gobject_class->finalize = kms_pointer_detector_finalize;
-  base_transform_class->start = GST_DEBUG_FUNCPTR (kms_pointer_detector_start);
-  base_transform_class->stop = GST_DEBUG_FUNCPTR (kms_pointer_detector_stop);
+  gobject_class->set_property = kms_pointer_detectix_set_property;
+  gobject_class->get_property = kms_pointer_detectix_get_property;
+  gobject_class->finalize = kms_pointer_detectix_finalize;
+  base_transform_class->start = GST_DEBUG_FUNCPTR (kms_pointer_detectix_start);
+  base_transform_class->stop = GST_DEBUG_FUNCPTR (kms_pointer_detectix_stop);
   video_filter_class->set_info =
-      GST_DEBUG_FUNCPTR (kms_pointer_detector_set_info);
+      GST_DEBUG_FUNCPTR (kms_pointer_detectix_set_info);
   video_filter_class->transform_frame_ip =
-      GST_DEBUG_FUNCPTR (kms_pointer_detector_transform_frame_ip);
+      GST_DEBUG_FUNCPTR (kms_pointer_detectix_transform_frame_ip);
 
   /* Properties initialization */
   g_object_class_install_property (gobject_class, PROP_SHOW_DEBUG_INFO,
@@ -993,18 +993,18 @@ kms_pointer_detector_class_init (KmsPointerDetectorClass * klass)
           "define the window used to calibrate the color to track",
           GST_TYPE_STRUCTURE, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
-  kms_pointer_detector_signals[SIGNAL_CALIBRATE_COLOR] =
+  kms_pointer_detectix_signals[SIGNAL_CALIBRATE_COLOR] =
       g_signal_new ("calibrate-color",
       G_TYPE_FROM_CLASS (klass),
       G_SIGNAL_ACTION | G_SIGNAL_RUN_LAST,
-      G_STRUCT_OFFSET (KmsPointerDetectorClass, calibrate_color), NULL, NULL,
+      G_STRUCT_OFFSET (KmsPointerDetectixClass, calibrate_color), NULL, NULL,
       __kms_core_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
-  g_type_class_add_private (klass, sizeof (KmsPointerDetectorPrivate));
+  g_type_class_add_private (klass, sizeof (KmsPointerDetectixPrivate));
 }
 
 gboolean
-kms_pointer_detector_plugin_init (GstPlugin * plugin)
+kms_pointer_detectix_plugin_init (GstPlugin * plugin)
 {
   return gst_element_register (plugin, PLUGIN_NAME, GST_RANK_NONE,
       KMS_TYPE_POINTER_DETECTOR);

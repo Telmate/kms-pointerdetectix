@@ -7,12 +7,12 @@
 
 Copyright © 2013-2016 [Kurento]. Licensed under [Apache 2.0 License].
 
-kms-pointerdetector
+kms-pointerdetectix
 ===================
 
-Pointer detector filter element for Kurento Media Server.
+Pointer detectix filter element for Kurento Media Server.
 
-The kms-pointerdetector project contains a **pointer detector filter** element
+The kms-pointerdetectix project contains a **pointer detectix filter** element
 for the Kurento Media Server.
 
 What is Kurento
