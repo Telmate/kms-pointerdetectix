@@ -20,8 +20,13 @@
 
 #include "FilterImpl.hpp"
 #include "PointerDetectixFilter.hpp"
-#include <EventHandler.hpp>
+
 #include <boost/property_tree/ptree.hpp>
+#include <jsonrpc/JsonSerializer.hpp>
+#include <KurentoException.hpp>
+#include <EventHandler.hpp>
+#include <mutex>
+
 
 namespace kurento
 {
@@ -71,46 +76,58 @@ class PointerDetectixFilterImpl : public FilterImpl,
 
 public:
 
-  PointerDetectixFilterImpl (const boost::property_tree::ptree &config,
+    PointerDetectixFilterImpl (const boost::property_tree::ptree &config,
                              std::shared_ptr<MediaPipeline> mediaPipeline,
                              std::shared_ptr<WindowParam> calibrationRegion,
                              const std::vector<std::shared_ptr<PointerDetectixWindowMediaParam>> &windows);
 
-  virtual ~PointerDetectixFilterImpl ();
+    virtual ~PointerDetectixFilterImpl ();
 
-  void addWindow (std::shared_ptr<PointerDetectixWindowMediaParam> window);
-  void clearWindows ();
-  void trackColorFromCalibrationRegion ();
-  void removeWindow (const std::string &windowId);
+    void addWindow (std::shared_ptr<PointerDetectixWindowMediaParam> window);
+    void clearWindows ();
+    void trackColorFromCalibrationRegion ();
+    void removeWindow (const std::string &windowId);
 
-  /* Next methods are automatically implemented by code generator */
-  virtual bool connect (const std::string &eventType,
-                        std::shared_ptr<EventHandler> handler);
+    bool startPipelinePlaying();                                    // starts pipeline PLAYING
 
-  sigc::signal<void, WindowIn> signalWindowIn;
-  sigc::signal<void, WindowOut> signalWindowOut;
-  virtual void invoke (std::shared_ptr<MediaObjectImpl> obj,
-                       const std::string &methodName, const Json::Value &params,
-                       Json::Value &response);
+    bool stopPipelinePlaying();                                     // changes PLAYING to READY
 
-  virtual void Serialize (JsonSerializer &serializer);
+    std::string getLastError();                                     // returns non-empty for errors
+
+    std::string getElementsNamesList();                             // returns NamesSeparatedByTabs
+
+    std::string getParamsList();                                    // returns ParamsSeparatedByTabs
+
+    std::string getParam(const std::string & rParamName);           // returns empty if invalid name
+
+    bool setParam(const std::string & rParamName, const std::string & rNewValue); // FALSE if failed
+
+    sigc::signal<void, WindowIn> signalWindowIn;
+    sigc::signal<void, WindowOut> signalWindowOut;
+
+    /* Next methods are automatically implemented by code generator */
+    virtual void Serialize (JsonSerializer &serializer);
+    virtual bool connect (const std::string &eventType, std::shared_ptr<EventHandler> handler);
+    virtual void invoke (std::shared_ptr<MediaObjectImpl> obj, const std::string &methodName, const Json::Value &params, Json::Value &response);
 
 protected:
   virtual void postConstructor ();
 
 private:
+    std::recursive_mutex    mRecursiveMutex;
+    std::string             mLastErrorDetails;
+    GstElement            * mNativeElementPtr;
+    gulong                  bus_handler_id;
 
-  GstElement *pointerDetectix;
-  gulong bus_handler_id;
-  void busMessage (GstMessage *message);
+    void busMessage (GstMessage *message);
 
-  class StaticConstructor
-  {
-  public:
-    StaticConstructor();
-  };
+    class StaticConstructor
+    {
+        public:
+        StaticConstructor();
+    };
 
-  static StaticConstructor staticConstructor;
+    static StaticConstructor staticConstructor;
 
 };
 
@@ -119,3 +136,4 @@ private:
 } /* kurento */
 
 #endif /*  __POINTER_DETECTOR_FILTER_IMPL_HPP__ */
+

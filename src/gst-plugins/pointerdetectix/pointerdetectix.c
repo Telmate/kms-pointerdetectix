@@ -19,17 +19,4 @@
 
 #include "kmspointerdetectix.h"
 
-static gboolean
-init (GstPlugin * plugin)
-{
-  if (!kms_pointer_detectix_plugin_init (plugin))
-    return FALSE;
 
-  return TRUE;
-}
-
-GST_PLUGIN_DEFINE (GST_VERSION_MAJOR,
-    GST_VERSION_MINOR,
-    kmspointerdetectix,
-    "Kurento pointer detectix",
-    init, VERSION, GST_LICENSE_UNKNOWN, "Kurento", "http://kurento.com/")

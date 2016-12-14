@@ -27,46 +27,138 @@
             }
           ]
         },
-      "methods": [
-        {
-          "name": "addWindow",
-          "doc": " Adds a new detection window for the filter to detect pointers entering or exiting the window",
-          "params": [
-            {
-              "name": "window",
-              "doc": "The window to be added",
-              "type": "PointerDetectixWindowMediaParam"
-            }
-          ]
-        },
-        {
-          "name": "clearWindows",
-          "doc": "Removes all pointer detectix windows",
-          "params": []
-        },
-        {
-          "name": "trackColorFromCalibrationRegion",
-          "doc": "This method allows to calibrate the tracking color.\n\nThe new tracking color will be the color of the object in the colorCalibrationRegion.",
-          "params": []
-        },
-        {
-          "name": "removeWindow",
-          "doc": "Removes a window from the list to be monitored",
-          "params": [
-            {
-              "name": "windowId",
-              "doc": "the id of the window to be removed",
-              "type": "String"
-            }
-          ]
-        }
+      "methods": 
+      [
+                {
+                    "name": "startPipelinePlaying",
+                    "doc":  "changes pipeline state to PLAYING",
+                    "params": [ ],
+                    "return": 
+                    {
+                        "doc": "FALSE when Failed.",
+                        "type": "boolean"
+                    }
+                },
+                {
+                    "name": "stopPipelinePlaying",
+                    "doc":  "changes pipeline state from PLAYING to READY",
+                    "params": [ ],
+                    "return": 
+                    {
+                        "doc": "FALSE when Failed.",
+                        "type": "boolean"
+                    }
+                },
+                {
+                    "name": "getElementsNamesList",
+                    "doc": "gets a string of names of all elements separated by tabs.",
+                    "params": [ ],
+                    "return": 
+                    {
+                        "doc": "names of all elements separated by tabs --- pipeline name is the first element",
+                        "type": "String"
+                    }
+                },
+                {
+                    "name": "getLastError",
+                    "doc": "gets string of last error --- empty string when no error",
+                    "params": [ ],
+                    "return": 
+                    {
+                        "doc": "string of last error --- empty string when no error",
+                        "type": "String"
+                    }
+                },
+                {
+                    "name": "getParamsList",
+                    "doc": "gets a string of all parameters separated by tabs.",
+                    "params": [ ],
+                    "return": 
+                    {
+                        "doc": "all parameters separated by tabs --- each one is: name=value",
+                        "type": "String"
+                    }
+                },
+                {
+                    "name": "getParam",
+                    "doc": "gets the current string value of one parameter.",
+                    "params": 
+                    [
+                        {
+                            "name": "aParamName",
+                            "doc":  "string with name of parameter.",
+                            "type": "String"
+                        }
+                    ],
+                    "return": 
+                    {
+                        "doc": "current value of named parameter --- empty if invalid name",
+                        "type": "String"
+                    }
+                },
+                {
+                    "name": "setParam",
+                    "doc": "sets the current string value of one parameter.",
+                    "params": 
+                    [
+                        {
+                            "name": "aParamName",
+                            "doc":  "string with name of parameter.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "aNewParamValue",
+                            "doc":  "string has the desired value of the parameter.",
+                            "type": "String"
+                        }
+                    ],
+                    "return": 
+                    {
+                        "doc": "FALSE when Failed.",
+                        "type": "boolean"
+                    }
+                },
+
+                {
+                  "name": "addWindow",
+                  "doc": " Adds a new detection window for the filter to detect pointers entering or exiting the window",
+                  "params": [
+                    {
+                      "name": "window",
+                      "doc": "The window to be added",
+                      "type": "PointerDetectixWindowMediaParam"
+                    }
+                  ]
+                },
+                {
+                  "name": "clearWindows",
+                  "doc": "Removes all pointer detectix windows",
+                  "params": []
+                },
+                {
+                  "name": "trackColorFromCalibrationRegion",
+                  "doc": "This method allows to calibrate the tracking color.\n\nThe new tracking color will be the color of the object in the colorCalibrationRegion.",
+                  "params": []
+                },
+                {
+                  "name": "removeWindow",
+                  "doc": "Removes a window from the list to be monitored",
+                  "params": [
+                    {
+                      "name": "windowId",
+                      "doc": "the id of the window to be removed",
+                      "type": "String"
+                    }
+                  ]
+                }
+              ],
+              "events": [
+                "WindowIn",
+                "WindowOut"
+              ]
+          }
       ],
-      "events": [
-        "WindowIn",
-        "WindowOut"
-      ]
-    }
-  ],
+
   "complexTypes": [
     {
       "typeFormat": "REGISTER",

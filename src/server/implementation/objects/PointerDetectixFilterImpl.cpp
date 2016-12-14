@@ -81,7 +81,7 @@ void PointerDetectixFilterImpl::busMessage (GstMessage *message)
   const gchar *type;
   std::string windowIDStr, typeStr;
 
-  if (GST_MESSAGE_SRC (message) != GST_OBJECT (pointerDetectix) ||
+  if (GST_MESSAGE_SRC (message) != GST_OBJECT (mNativeElementPtr) ||
       GST_MESSAGE_TYPE (message) != GST_MESSAGE_ELEMENT) {
     return;
   }
@@ -157,9 +157,9 @@ PointerDetectixFilterImpl::PointerDetectixFilterImpl (const
 
   g_object_set (element, "filter-factory", "pointerdetectix", NULL);
 
-  g_object_get (G_OBJECT (element), "filter", &pointerDetectix, NULL);
+  g_object_get (G_OBJECT (element), "filter", &mNativeElementPtr, NULL);
 
-  if (pointerDetectix == NULL) {
+  if (mNativeElementPtr == NULL) {
     g_object_unref (bus);
     throw KurentoException (MEDIA_OBJECT_NOT_AVAILABLE,
                             "Media Object not available");
@@ -172,7 +172,7 @@ PointerDetectixFilterImpl::PointerDetectixFilterImpl (const
                       "width", G_TYPE_INT, calibrationRegion->getWidth(),
                       "height", G_TYPE_INT, calibrationRegion->getHeight(),
                       NULL);
-  g_object_set (G_OBJECT (pointerDetectix), CALIBRATION_AREA,
+  g_object_set (G_OBJECT (mNativeElementPtr), CALIBRATION_AREA,
                 calibrationArea, NULL);
   gst_structure_free (calibrationArea);
 
@@ -189,13 +189,13 @@ PointerDetectixFilterImpl::PointerDetectixFilterImpl (const
     gst_structure_free (buttonsLayoutAux);
   }
 
-  g_object_set (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, buttonsLayout,
+  g_object_set (G_OBJECT (mNativeElementPtr), WINDOWS_LAYOUT, buttonsLayout,
                 NULL);
   gst_structure_free (buttonsLayout);
 
   bus_handler_id = 0;
   // There is no need to reference pointerdetectix because its life cycle is the same as the filter life cycle
-  g_object_unref (pointerDetectix);
+  g_object_unref (mNativeElementPtr);
 }
 
 PointerDetectixFilterImpl::~PointerDetectixFilterImpl()
@@ -210,6 +210,203 @@ PointerDetectixFilterImpl::~PointerDetectixFilterImpl()
   }
 }
 
+bool PointerDetectixFilterImpl::startPipelinePlaying()
+{
+    std::unique_lock <std::recursive_mutex>  locker (mRecursiveMutex);
+
+    bool is_ok = (mNativeElementPtr != NULL);
+
+    if (is_ok)
+    {
+        GstElement * pipeline_ptr = (GstElement *) gst_element_get_parent( mNativeElementPtr );
+
+        if (pipeline_ptr != NULL)
+        {
+            GstState pipeline_state = GST_STATE_NULL;
+
+            gst_element_get_state(pipeline_ptr, &pipeline_state, NULL, 0);
+
+            if (pipeline_state != GST_STATE_PLAYING)
+            {
+                gst_element_set_state ( pipeline_ptr, GST_STATE_PLAYING );
+            }
+        }
+        else
+        {
+            is_ok = false;
+        }
+    }
+
+    mLastErrorDetails.assign( is_ok ? "" : "ERROR" );
+
+    return is_ok;
+}
+
+
+bool PointerDetectixFilterImpl::stopPipelinePlaying()
+{
+    std::unique_lock <std::recursive_mutex>  locker (mRecursiveMutex);
+
+    bool is_ok = (mNativeElementPtr != NULL);
+
+    if (is_ok)
+    {
+        GstElement * pipeline_ptr = (GstElement *) gst_element_get_parent( mNativeElementPtr );
+
+        if (pipeline_ptr != NULL)
+        {
+            GstState pipeline_state = GST_STATE_NULL;
+
+            gst_element_get_state(pipeline_ptr, &pipeline_state, NULL, 0);
+
+            if (pipeline_state == GST_STATE_PLAYING)
+            {
+                gst_element_set_state ( pipeline_ptr, GST_STATE_READY );
+            }
+        }
+        else
+        {
+            is_ok = false;
+        }
+    }
+
+    mLastErrorDetails.assign( is_ok ? "" : "ERROR" );
+
+    return is_ok;
+}
+
+
+std::string PointerDetectixFilterImpl::getLastError()
+{
+    std::unique_lock <std::recursive_mutex>  locker(mRecursiveMutex);
+
+    std::string  last_error( mLastErrorDetails.c_str() );
+
+    mLastErrorDetails.assign("");
+
+    return last_error;
+}
+
+
+std::string PointerDetectixFilterImpl::getElementsNamesList()
+{
+    std::unique_lock <std::recursive_mutex>  locker(mRecursiveMutex);
+
+    std::string  names_separated_by_tabs;
+
+    bool is_ok = (mNativeElementPtr != NULL);
+
+    GstElement * pipeline_ptr = is_ok ? (GstElement *) gst_element_get_parent(mNativeElementPtr) : NULL;
+
+    GstIterator * iterate_ptr = pipeline_ptr ? gst_bin_iterate_elements(GST_BIN(pipeline_ptr)) : NULL;
+
+    is_ok = (iterate_ptr != NULL);
+
+    if (is_ok)
+    {
+        gchar * name_ptr = gst_element_get_name(pipeline_ptr);
+
+        names_separated_by_tabs.append(name_ptr ? name_ptr : "PipelineNameIsNull");
+        names_separated_by_tabs.append("\t");
+
+        g_free(name_ptr);
+
+        GValue element_as_value = G_VALUE_INIT;
+
+        while (gst_iterator_next(iterate_ptr, &element_as_value) == GST_ITERATOR_OK)
+        {
+            name_ptr = gst_element_get_name( g_value_get_object(&element_as_value) );
+
+            names_separated_by_tabs.append(name_ptr ? name_ptr : "ElementNameIsNull");
+            names_separated_by_tabs.append("\t");
+
+            g_free(name_ptr);
+
+            g_value_reset( &element_as_value );
+        }
+
+        g_value_unset( &element_as_value );
+
+        gst_iterator_free(iterate_ptr);
+    }
+
+    mLastErrorDetails.assign( is_ok ? "" : "ERROR" );
+
+    return names_separated_by_tabs;
+}
+
+
+std::string PointerDetectixFilterImpl::getParamsList()
+{
+    static const char * names[] = { "wait", "snap", "link", "pads", "path", "note", NULL };
+
+    std::string  params_separated_by_tabs;
+
+    int index = -1;
+
+    while ( names[++index] != NULL )
+    {
+        std::string param_text = getParam( std::string(names[index]) );
+
+        bool is_ok = mLastErrorDetails.empty();
+
+        if (! is_ok)
+        {
+            params_separated_by_tabs.assign("");
+            break;
+        }
+
+        params_separated_by_tabs.append( names[index] ); 
+        params_separated_by_tabs.append( "=" );
+
+        params_separated_by_tabs.append( param_text.c_str() );
+        params_separated_by_tabs.append( "\t" );
+    }
+
+    return params_separated_by_tabs;
+}
+
+
+std::string PointerDetectixFilterImpl::getParam(const std::string & rParamName)
+{
+    std::unique_lock <std::recursive_mutex>  locker (mRecursiveMutex);
+
+    gchar * text_ptr = NULL;
+
+    bool is_ok = (mNativeElementPtr != NULL);
+
+    if (is_ok)
+    {
+        g_object_get( G_OBJECT(mNativeElementPtr), rParamName.c_str(), & text_ptr, NULL );
+
+        is_ok = (text_ptr != NULL);
+    }
+
+    std::string param_value(is_ok ? text_ptr : "");
+
+    mLastErrorDetails.assign(is_ok ? "" : "ERROR");
+
+    return param_value;
+}
+
+
+bool PointerDetectixFilterImpl::setParam(const std::string & rParamName, const std::string & rNewValue)
+{
+    std::unique_lock <std::recursive_mutex>  locker (mRecursiveMutex);
+
+    std::string param_text = getParam(rParamName);
+
+    bool is_ok = mLastErrorDetails.empty();
+
+    if (is_ok)
+    {
+        g_object_set( G_OBJECT(mNativeElementPtr), rParamName.c_str(), rNewValue.c_str(), NULL );
+    }
+
+    mLastErrorDetails.assign( is_ok ? "" : "ERROR" );
+
+    return is_ok;
+}
 
 void PointerDetectixFilterImpl::addWindow (
   std::shared_ptr<PointerDetectixWindowMediaParam> window)
@@ -219,13 +416,13 @@ void PointerDetectixFilterImpl::addWindow (
   buttonsLayoutAux = get_structure_from_window (window);
 
   /* The function obtains the actual window list */
-  g_object_get (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, &buttonsLayout,
+  g_object_get (G_OBJECT (mNativeElementPtr), WINDOWS_LAYOUT, &buttonsLayout,
                 NULL);
   gst_structure_set (buttonsLayout,
                      window->getId().c_str(), GST_TYPE_STRUCTURE,
                      buttonsLayoutAux, NULL);
 
-  g_object_set (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, buttonsLayout, NULL);
+  g_object_set (G_OBJECT (mNativeElementPtr), WINDOWS_LAYOUT, buttonsLayout, NULL);
 
   gst_structure_free (buttonsLayout);
   gst_structure_free (buttonsLayoutAux);
@@ -236,14 +433,14 @@ void PointerDetectixFilterImpl::clearWindows ()
   GstStructure *buttonsLayout;
 
   buttonsLayout = gst_structure_new_empty  ("buttonsLayout");
-  g_object_set (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, buttonsLayout,
+  g_object_set (G_OBJECT (mNativeElementPtr), WINDOWS_LAYOUT, buttonsLayout,
                 NULL);
   gst_structure_free (buttonsLayout);
 }
 
 void PointerDetectixFilterImpl::trackColorFromCalibrationRegion ()
 {
-  g_signal_emit_by_name (pointerDetectix, CALIBRATE_COLOR, NULL);
+  g_signal_emit_by_name (mNativeElementPtr, CALIBRATE_COLOR, NULL);
 }
 
 void PointerDetectixFilterImpl::removeWindow (const std::string &windowId)
@@ -252,7 +449,7 @@ void PointerDetectixFilterImpl::removeWindow (const std::string &windowId)
   gint len;
 
   /* The function obtains the actual window list */
-  g_object_get (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, &buttonsLayout,
+  g_object_get (G_OBJECT (mNativeElementPtr), WINDOWS_LAYOUT, &buttonsLayout,
                 NULL);
   len = gst_structure_n_fields (buttonsLayout);
 
@@ -272,7 +469,7 @@ void PointerDetectixFilterImpl::removeWindow (const std::string &windowId)
   }
 
   /* Set the buttons layout list without the window with id = id */
-  g_object_set (G_OBJECT (pointerDetectix), WINDOWS_LAYOUT, buttonsLayout, NULL);
+  g_object_set (G_OBJECT (mNativeElementPtr), WINDOWS_LAYOUT, buttonsLayout, NULL);
 
   gst_structure_free (buttonsLayout);
 }
